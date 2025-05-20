@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 // endpointsResponse represents the internal API response when retrieving endpoints for a model.
@@ -84,7 +85,8 @@ type EndpointPricing struct {
 //   - EndpointData: Contains model information and a list of available endpoints
 //   - error: Any error that occurred during the request
 func (c *Client) ListEndpoints(ctx context.Context, author string, slug string) (data EndpointData, err error) {
-	urlSuffix := fmt.Sprintf("/models/%s/%s/endpoints", author, slug)
+	// URL encode the author and slug to handle special characters
+	urlSuffix := fmt.Sprintf("/models/%s/%s/endpoints", url.PathEscape(author), url.PathEscape(slug))
 	var response endpointsResponse
 
 	req, err := c.newRequest(ctx, http.MethodGet, c.fullURL(urlSuffix))
