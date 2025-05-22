@@ -22,12 +22,27 @@ checksum:
 changelog:
   sort: asc
   use: github
+  format: "{{ .SHA }}: {{ .Message }}{{ with .AuthorUsername }} (@{{ . }}){{ end }}"
   filters:
     exclude:
-      - "^docs:"
       - "^test:"
       - Merge pull request
       - Merge branch
+  groups:
+    - title: "New Features"
+      regexp: '^feat(\(.+\))??!?:.+$'
+      order: 100
+    - title: "Bug fixes"
+      regexp: '^(fix|perf)(\(.+\))??!?:.+$'
+      order: 150
+    - title: "Documentation updates"
+      regexp: '^docs?(\(.+\))??!?:.+$'
+      order: 300
+    - title: "Maintenance"
+      regexp: '^(chore|refactor)(\(.+\))??!?:.+$'
+      order: 400
+    - title: Other work
+      order: 9999
 
 release:
   github:

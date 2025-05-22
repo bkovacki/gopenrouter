@@ -58,7 +58,7 @@ docs:
 	pkgsite -http=:6060 &
 
 changelog:
-	git-chglog -o CHANGELOG.md
+	git-chglog -o CHANGELOG.md --next-tag v${VERSION}
 
 release:
 	@echo "Creating release v$(VERSION)"
