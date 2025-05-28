@@ -24,7 +24,7 @@ func TestClientCompletion(t *testing.T) {
 		expectRespText string
 	}{
 		{
-			name: "success",
+			name: "Success",
 			request: gopenrouter.NewCompletionRequestBuilder(
 				"test-model",
 				"Say hello",
@@ -46,7 +46,7 @@ func TestClientCompletion(t *testing.T) {
 			expectRespText: "Hello, world!",
 		},
 		{
-			name: "api error",
+			name: "APIError",
 			request: gopenrouter.NewCompletionRequestBuilder(
 				"test-model",
 				"Say hello",
@@ -61,7 +61,7 @@ func TestClientCompletion(t *testing.T) {
 			expectReqErr: false,
 		},
 		{
-			name: "unexpected html",
+			name: "UnexpectedHTML",
 			request: gopenrouter.NewCompletionRequestBuilder(
 				"test-model",
 				"Say hello",
@@ -76,7 +76,7 @@ func TestClientCompletion(t *testing.T) {
 			expectReqErr: true,
 		},
 		{
-			name: "stream not supported",
+			name: "StreamNotSupported",
 			request: gopenrouter.NewCompletionRequestBuilder(
 				"test-model",
 				"Say hello",
@@ -135,7 +135,7 @@ func TestCompletionRequestBuilder(t *testing.T) {
 	testModel := "test-model"
 	testPrompt := "test-prompt"
 
-	t.Run("Basic construction with required fields", func(t *testing.T) {
+	t.Run("ConstructionWithRequiredFields", func(t *testing.T) {
 
 		builder := gopenrouter.NewCompletionRequestBuilder(testModel, testPrompt)
 		request := builder.Build()
@@ -148,7 +148,7 @@ func TestCompletionRequestBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("With all scalar options", func(t *testing.T) {
+	t.Run("WithAllScalarOptions", func(t *testing.T) {
 		stream := true
 		maxTokens := 100
 		temperature := 0.7
@@ -216,7 +216,7 @@ func TestCompletionRequestBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("With array and map options", func(t *testing.T) {
+	t.Run("WithArrayAndMapOptions", func(t *testing.T) {
 		models := []string{"model1", "model2"}
 		transforms := []string{"transform1", "transform2"}
 		logitBias := map[string]float64{"123": 1.0, "456": -1.0}
@@ -239,7 +239,7 @@ func TestCompletionRequestBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("With Usage option", func(t *testing.T) {
+	t.Run("WithUsageOption", func(t *testing.T) {
 		builder := gopenrouter.NewCompletionRequestBuilder(testModel, testPrompt)
 		request := builder.
 			WithUsage(true).
@@ -253,7 +253,7 @@ func TestCompletionRequestBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("With Reasoning option", func(t *testing.T) {
+	t.Run("WithReasoningOption", func(t *testing.T) {
 		maxTokens := 50
 		exclude := true
 		reasoning := &gopenrouter.ReasoningOptions{
@@ -281,7 +281,7 @@ func TestCompletionRequestBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("With Provider option", func(t *testing.T) {
+	t.Run("WithProviderOption", func(t *testing.T) {
 		providerBuilder := gopenrouter.NewProviderOptionsBuilder()
 		provider := providerBuilder.
 			WithSort("price").
@@ -302,7 +302,7 @@ func TestCompletionRequestBuilder(t *testing.T) {
 }
 
 func TestProviderOptionsBuilder(t *testing.T) {
-	t.Run("Empty builder creates default options", func(t *testing.T) {
+	t.Run("EmptyBuilder", func(t *testing.T) {
 		builder := gopenrouter.NewProviderOptionsBuilder()
 		options := builder.Build()
 
@@ -320,7 +320,7 @@ func TestProviderOptionsBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("Boolean options", func(t *testing.T) {
+	t.Run("BooleanOptions", func(t *testing.T) {
 		allowFallbacks := true
 		requireParams := false
 		forceChatCompletions := true
@@ -346,7 +346,7 @@ func TestProviderOptionsBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("String options", func(t *testing.T) {
+	t.Run("StringOptions", func(t *testing.T) {
 		dataCollection := "deny"
 		sort := "latency"
 
@@ -364,7 +364,7 @@ func TestProviderOptionsBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("Array options", func(t *testing.T) {
+	t.Run("ArrayOptions", func(t *testing.T) {
 		order := []string{"Anthropic", "OpenAI"}
 		only := []string{"Anthropic"}
 		ignore := []string{"Claude"}
@@ -392,7 +392,7 @@ func TestProviderOptionsBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("MaxPrice options with full object", func(t *testing.T) {
+	t.Run("MaxPriceOptionsWithFullObject", func(t *testing.T) {
 		promptPrice := 0.001
 		completionPrice := 0.002
 		imagePrice := 0.01
@@ -427,7 +427,7 @@ func TestProviderOptionsBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("MaxPrice options with individual setters", func(t *testing.T) {
+	t.Run("MaxPriceOptionsWithIndividualSetters", func(t *testing.T) {
 		promptPrice := 0.001
 		completionPrice := 0.002
 		imagePrice := 0.01
@@ -458,7 +458,7 @@ func TestProviderOptionsBuilder(t *testing.T) {
 		}
 	})
 
-	t.Run("Method chaining", func(t *testing.T) {
+	t.Run("MethodChaining", func(t *testing.T) {
 		allowFallbacks := true
 		dataCollection := "deny"
 		order := []string{"Anthropic", "OpenAI"}

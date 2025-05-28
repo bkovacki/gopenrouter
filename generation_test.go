@@ -21,7 +21,7 @@ func TestClientGetGeneration(t *testing.T) {
 		expectID     string
 	}{
 		{
-			name: "success",
+			name: "Success",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = fmt.Fprint(w, `{
@@ -59,7 +59,7 @@ func TestClientGetGeneration(t *testing.T) {
 			expectID:  "gen-123",
 		},
 		{
-			name: "api error",
+			name: "APIError",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Header().Set("Content-Type", "application/json")
@@ -69,7 +69,7 @@ func TestClientGetGeneration(t *testing.T) {
 			expectAPIErr: true,
 		},
 		{
-			name: "unexpected html",
+			name: "UnexpectedHTML",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Header().Set("Content-Type", "text/html")

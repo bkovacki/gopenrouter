@@ -22,7 +22,7 @@ func TestClientCredits(t *testing.T) {
 		expectUsage  float64
 	}{
 		{
-			name: "success",
+			name: "Success",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = fmt.Fprint(w, `{"data": {"total_credits": 42.5, "total_usage": 10.25}}`)
@@ -32,7 +32,7 @@ func TestClientCredits(t *testing.T) {
 			expectUsage: 10.25,
 		},
 		{
-			name: "api error",
+			name: "APIError",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Header().Set("Content-Type", "application/json")
@@ -42,7 +42,7 @@ func TestClientCredits(t *testing.T) {
 			expectAPIErr: true,
 		},
 		{
-			name: "unexpected html",
+			name: "UnexpectedHTML",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Header().Set("Content-Type", "text/html")
