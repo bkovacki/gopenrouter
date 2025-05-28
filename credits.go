@@ -15,9 +15,9 @@ type creditsResponse struct {
 // This provides visibility into the account's financial standing with OpenRouter.
 type CreditsData struct {
 	// TotalCredits represents the total amount of credits purchased or added to the account
-	TotalCredits float32 `json:"total_credits"`
+	TotalCredits float64 `json:"total_credits"`
 	// TotalUsage represents the total amount of credits consumed by API requests
-	TotalUsage float32 `json:"total_usage"`
+	TotalUsage float64 `json:"total_usage"`
 }
 
 // GetCredits retrieves information about the authenticated user's credits and usage.

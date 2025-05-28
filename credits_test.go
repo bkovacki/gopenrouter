@@ -18,8 +18,8 @@ func TestClientCredits(t *testing.T) {
 		expectErr    bool
 		expectAPIErr bool
 		expectReqErr bool
-		expectTotal  float32
-		expectUsage  float32
+		expectTotal  float64
+		expectUsage  float64
 	}{
 		{
 			name: "success",
