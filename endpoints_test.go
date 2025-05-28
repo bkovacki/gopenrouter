@@ -24,7 +24,7 @@ func TestListEndpoints(t *testing.T) {
 		validateResp func(t *testing.T, data gopenrouter.EndpointData)
 	}{
 		{
-			name:   "success",
+			name:   "Success",
 			author: "test-author",
 			slug:   "test-model",
 			handler: func(w http.ResponseWriter, r *http.Request) {
@@ -163,7 +163,7 @@ func TestListEndpoints(t *testing.T) {
 			},
 		},
 		{
-			name:   "api error",
+			name:   "APIError",
 			author: "test-author",
 			slug:   "test-model",
 			handler: func(w http.ResponseWriter, r *http.Request) {
@@ -176,7 +176,7 @@ func TestListEndpoints(t *testing.T) {
 			expectReqErr: false,
 		},
 		{
-			name:   "unexpected html response",
+			name:   "UnexpectedHTMLResponse",
 			author: "test-author",
 			slug:   "test-model",
 			handler: func(w http.ResponseWriter, r *http.Request) {
@@ -189,25 +189,25 @@ func TestListEndpoints(t *testing.T) {
 			expectReqErr: true,
 		},
 		{
-			name:   "special characters in path",
+			name:   "SpecialCharactersInPath",
 			author: "special-author@with/chars",
 			slug:   "special-model#name",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				// Check if the path is correctly URL-encoded with special characters
 				expectedPath := "/models/special-author@with%2Fchars/special-model%23name/endpoints"
-				
+
 				// Use the raw path (which preserves URL encoding) or request URI for checking
 				actualPath := r.URL.RawPath
 				if actualPath == "" {
 					actualPath = r.RequestURI
 				}
-				
+
 				if actualPath != expectedPath {
 					t.Errorf("Expected encoded path %s, got %s", expectedPath, actualPath)
 					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
-				
+
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = fmt.Fprint(w, `{"data": {"id": "test-id", "name": "Test Model"}}`)
 			},
@@ -219,7 +219,7 @@ func TestListEndpoints(t *testing.T) {
 			},
 		},
 		{
-			name:   "URL encoding test",
+			name:   "URLEncodingTest",
 			author: "openai",
 			slug:   "gpt-4-turbo",
 			handler: func(w http.ResponseWriter, r *http.Request) {
@@ -230,7 +230,7 @@ func TestListEndpoints(t *testing.T) {
 					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
-				
+
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = fmt.Fprint(w, `{"data": {"id": "openai/gpt-4-turbo", "name": "GPT-4 Turbo"}}`)
 			},
@@ -253,7 +253,7 @@ func TestListEndpoints(t *testing.T) {
 
 			client := gopenrouter.New("test-key", gopenrouter.WithBaseURL(ts.URL))
 			data, err := client.ListEndpoints(context.Background(), tc.author, tc.slug)
-			
+
 			var apiErr *gopenrouter.APIError
 			var reqErr *gopenrouter.RequestError
 

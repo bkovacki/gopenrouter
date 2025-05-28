@@ -82,7 +82,7 @@ func TestHandleErrorResp(t *testing.T) {
 		expectMsg    string
 	}{
 		{
-			name:         "valid ErrorResponse",
+			name:         "ValidErrorResponse",
 			body:         `{"error": {"code": 400, "message": "Invalid request"}}`,
 			statusCode:   400,
 			expectAPIErr: true,
@@ -90,7 +90,7 @@ func TestHandleErrorResp(t *testing.T) {
 			expectMsg:    "Invalid request",
 		},
 		{
-			name:         "invalid JSON returns RequestError",
+			name:         "InvalidJSONRequestError",
 			body:         `not a json`,
 			statusCode:   500,
 			expectAPIErr: false,
@@ -168,7 +168,7 @@ func TestClientNewRequest(t *testing.T) {
 		wantContentType string
 	}{
 		{
-			name:            "POST with body and query params",
+			name:            "PostWithBodyAndQueryParams",
 			method:          http.MethodPost,
 			path:            "/users",
 			setters:         []requestOption{withQueryParam("foo", "bar"), withBody(payload{Name: "test"})},
@@ -177,7 +177,7 @@ func TestClientNewRequest(t *testing.T) {
 			wantContentType: "application/json",
 		},
 		{
-			name:            "GET with query params",
+			name:            "GetWithQueryParams",
 			method:          http.MethodGet,
 			path:            "/users",
 			setters:         []requestOption{withQueryParam("a", "b")},
@@ -185,14 +185,14 @@ func TestClientNewRequest(t *testing.T) {
 			wantContentType: "application/json",
 		},
 		{
-			name:            "GET without query params",
+			name:            "GetWithoutQueryParams",
 			method:          http.MethodGet,
 			path:            "/users",
 			wantURL:         "https://api.example.com/users",
 			wantContentType: "application/json",
 		},
 		{
-			name:            "POST with custom content type",
+			name:            "PostWithCustomContentType",
 			method:          http.MethodPost,
 			path:            "/custom",
 			setters:         []requestOption{withContentType("application/x-custom"), withBody(payload{Name: "custom"})},
