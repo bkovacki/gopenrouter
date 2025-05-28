@@ -19,7 +19,7 @@ type ModelData struct {
 	// Name is the human-readable name of the model
 	Name string `json:"name"`
 	// Created is the Unix timestamp when the model was added to OpenRouter
-	Created float32 `json:"created"`
+	Created float64 `json:"created"`
 	// Description provides details about the model's capabilities
 	Description string `json:"description"`
 	// Architecture contains information about the model's input/output capabilities
@@ -29,7 +29,9 @@ type ModelData struct {
 	// Pricing contains the cost information for using this model
 	Pricing ModelPricing `json:"pricing"`
 	// ContextLength is the maximum number of tokens the model can process
-	ContextLength float32 `json:"context_length,omitempty"`
+	ContextLength *float64 `json:"context_length,omitempty"`
+	// HuggingFaceID is the identifier for the model on Hugging Face (if available)
+	HuggingFaceID *string `json:"hugging_face_id,omitempty"`
 	// PerRequestLimits contains any limitations on requests to this model
 	PerRequestLimits map[string]any `json:"per_request_limits,omitempty"`
 	// SupportedParameters lists all parameters that can be used with this model
@@ -39,6 +41,8 @@ type ModelData struct {
 
 // ModelArchitecture contains information about the model's input and output capabilities.
 type ModelArchitecture struct {
+	// Modality describes the input and output types in format "input->output" (e.g., "text->text", "text+image->text")
+	Modality string `json:"modality"`
 	// InputModalities describes the types of input the model can accept (e.g., "text", "image")
 	InputModalities []string `json:"input_modalities"`
 	// OutputModalities describes the types of output the model can produce (e.g., "text")
@@ -46,7 +50,7 @@ type ModelArchitecture struct {
 	// Tokenizer indicates the tokenization method used by the model (e.g., "GPT")
 	Tokenizer string `json:"tokenizer"`
 	// InstructType specifies the instruction format the model uses (if applicable)
-	InstructType string `json:"instruct_type,omitempty"`
+	InstructType *string `json:"instruct_type,omitempty"`
 }
 
 // ModelTopProvider contains information about the primary provider for a model.
@@ -54,10 +58,9 @@ type ModelTopProvider struct {
 	// IsModerated indicates if the provider applies content moderation
 	IsModerated bool `json:"is_moderated"`
 	// ContextLength is the maximum context length supported by this specific provider
-	ContextLength float32 `json:"context_length,omitempty"`
-	// MaxCompletionTokent is the maximum number of tokens the provider allows in completions
-	// Note: Field name has a typo but matches the API response
-	MaxCompletionTokent float32 `json:"max_completion_tokens,omitempty"`
+	ContextLength *float64 `json:"context_length,omitempty"`
+	// MaxCompletionTokens is the maximum number of tokens the provider allows in completions
+	MaxCompletionTokens *float64 `json:"max_completion_tokens,omitempty"`
 }
 
 // ModelPricing contains the cost information for using a model.
