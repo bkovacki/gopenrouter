@@ -360,12 +360,8 @@ stream, err := client.ChatCompletionStream(ctx, request)
 
 ### Invalid Responses
 
-The client automatically skips malformed chunks and continues processing:
-
-```go
-// Malformed JSON chunks are skipped automatically
-// Only valid chunks are returned from Recv()
-```
+The client automatically skips malformed chunks and continues processing.
+Only valid chunks are returned from `Recv()`.
 
 ## Performance Considerations
 

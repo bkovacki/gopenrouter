@@ -20,7 +20,7 @@ export OPENROUTER_API_KEY="your-api-key-here"
 ## Running the Example
 
 ```bash
-go run main.go
+go run streaming.go
 ```
 
 ## Key Concepts

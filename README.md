@@ -240,9 +240,8 @@ Located in `examples/simple_completion/`, this example demonstrates:
 
 Run the example:
 ```bash
-cd examples/simple_completion
 export OPENROUTER_API_KEY="your-api-key-here"
-go run main.go  # Note: This will incur API charges
+go run examples/simple_completion/simple_completion.go  # Note: This will incur API charges
 ```
 
 ### Chat Completion Example
@@ -255,9 +254,8 @@ Located in `examples/chat_completion/`, this example demonstrates:
 
 Run the example:
 ```bash
-cd examples/chat_completion
 export OPENROUTER_API_KEY="your-api-key-here"
-go run chat_completion.go  # Note: This will incur API charges
+go run examples/chat_completion/chat_completion.go  # Note: This will incur API charges
 ```
 
 ### Streaming Example
@@ -269,9 +267,8 @@ Located in `examples/streaming/`, this example demonstrates:
 
 Run the example:
 ```bash
-cd examples/streaming
 export OPENROUTER_API_KEY="your-api-key-here"
-go run main.go  # Note: This will incur API charges
+go run examples/streaming/streaming.go  # Note: This will incur API charges
 ```
 
 ## Error Handling
