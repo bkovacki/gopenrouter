@@ -5,16 +5,17 @@ The GOpenRouter library provides convenient access to the [OpenRouter](https://o
 [![License](https://img.shields.io/github/license/bkovacki/gopenrouter)](https://github.com/bkovacki/gopenrouter/blob/main/LICENSE)
 [![codecov](https://codecov.io/gh/bkovacki/gopenrouter/graph/badge.svg?token=vXQDEiWmJI)](https://codecov.io/gh/bkovacki/gopenrouter)
 
-> **Note**: Support for streaming responses and chat completions will be added in future releases.
+> **Note**: Support for streaming responses will be added in future releases.
 
 ## Features
 
 - Complete OpenRouter API coverage
+- Text completion and chat completion support
 - Builder pattern for constructing requests
 - Customizable HTTP client with middleware support
 - Proper error handling and detailed error types
 - Context support for request cancellation and timeouts
-- Comprehensive documentation
+- Comprehensive documentation and examples
 
 ## Installation
 
@@ -53,7 +54,7 @@ client := gopenrouter.New(
 )
 ```
 
-### Generating Completions
+### Text Completions
 
 ```go
 // Create a completion request using the builder pattern
@@ -73,6 +74,39 @@ if err != nil {
 
 // Use the response
 fmt.Println(resp.Choices[0].Text)
+```
+
+### Chat Completions
+
+```go
+// Create conversation messages
+messages := []gopenrouter.ChatMessage{
+    {
+        Role:    "system",
+        Content: "You are a helpful assistant that provides concise answers.",
+    },
+    {
+        Role:    "user",
+        Content: "What is the capital of France?",
+    },
+}
+
+// Build chat completion request
+request := gopenrouter.NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages).
+    WithMaxTokens(100).
+    WithTemperature(0.7).
+    WithUsage(true).
+    Build()
+
+// Make the chat completion request
+ctx := context.Background()
+response, err := client.ChatCompletion(ctx, request)
+if err != nil {
+    log.Fatalf("Chat completion failed: %v", err)
+}
+
+// Use the response
+fmt.Printf("Assistant: %s\n", response.Choices[0].Message.Content)
 ```
 
 ### Advanced Provider Routing
@@ -141,6 +175,42 @@ fmt.Printf("Prompt Tokens: %d\n", generation.TokensPrompt)
 fmt.Printf("Completion Tokens: %d\n", generation.TokensCompletion)
 ```
 
+## Examples
+
+The library includes comprehensive examples to help you get started:
+
+> **⚠️ Cost Warning**: Running these examples will make actual API calls to OpenRouter and will incur charges based on your usage. Please monitor your credits and usage to avoid unexpected costs.
+
+### Simple Completion Example
+Located in `examples/simple_completion/`, this example demonstrates:
+- Basic text completion with usage reporting
+- Generation details retrieval using the generation endpoint
+- Credits status monitoring before and after requests
+- Cost calculation for individual requests
+- Advanced provider options with cost controls
+
+Run the example:
+```bash
+cd examples/simple_completion
+export OPENROUTER_API_KEY="your-api-key-here"
+go run main.go  # Note: This will incur API charges
+```
+
+### Chat Completion Example
+Located in `examples/chat_completion/`, this example demonstrates:
+- Basic chat completion with system and user messages
+- Multi-turn conversations with context
+- Provider options for cost control and fallbacks
+- Different AI models (OpenAI, Anthropic, etc.)
+- Parameter tuning (temperature, penalties, etc.)
+
+Run the example:
+```bash
+cd examples/chat_completion
+export OPENROUTER_API_KEY="your-api-key-here"
+go run chat_completion.go  # Note: This will incur API charges
+```
+
 ## Error Handling
 
 The library provides detailed error types for API errors and request errors:
@@ -192,9 +262,9 @@ Contributions to GOpenRouter are welcome! Please feel free to submit a Pull Requ
 
 ## Roadmap
 
-- [ ] Chat completion API support
+- [x] Chat completion API support
+- [x] Examples for common use cases
 - [ ] Streaming support for completion requests
-- [ ] Examples for common use cases
 - [ ] Additional helper methods for advanced use cases
 
 ## License
