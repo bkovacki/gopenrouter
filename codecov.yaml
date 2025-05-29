@@ -1,0 +1,16 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 5
+  ignore:
+    - "examples/**/*"
+    - "**/*_test.go"
+
+comment:
+  behavior: default
+  require_changes: false
+
+github_checks:
+  annotations: true
