@@ -51,6 +51,10 @@ type ChatCompletionRequest struct {
 	MinP *float64 `json:"min_p,omitempty"`
 	// TopA is an alternate top sampling parameter (range: [0, 1])
 	TopA *float64 `json:"top_a,omitempty"`
+	// Logprobs enables returning log probabilities of output tokens
+	Logprobs *bool `json:"logprobs,omitempty"`
+	// Stop specifies sequences where the model will stop generating tokens
+	Stop []string `json:"stop,omitempty"`
 	// User is a stable identifier for end-users, used to help detect and prevent abuse
 	User *string `json:"user,omitempty"`
 }
@@ -210,6 +214,18 @@ func (b *ChatCompletionRequestBuilder) WithMinP(minP float64) *ChatCompletionReq
 // WithTopA sets the top-a sampling parameter.
 func (b *ChatCompletionRequestBuilder) WithTopA(topA float64) *ChatCompletionRequestBuilder {
 	b.request.TopA = &topA
+	return b
+}
+
+// WithLogprobs enables or disables returning log probabilities of output tokens.
+func (b *ChatCompletionRequestBuilder) WithLogprobs(logprobs bool) *ChatCompletionRequestBuilder {
+	b.request.Logprobs = &logprobs
+	return b
+}
+
+// WithStop sets the stop sequences for token generation.
+func (b *ChatCompletionRequestBuilder) WithStop(stop []string) *ChatCompletionRequestBuilder {
+	b.request.Stop = stop
 	return b
 }
 

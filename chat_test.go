@@ -116,6 +116,8 @@ func TestChatCompletionRequestBuilder(t *testing.T) {
 			WithMinP(0.05).
 			WithTopA(0.2).
 			WithSeed(42).
+			WithLogprobs(true).
+			WithStop([]string{"STOP", "END"}).
 			Build()
 
 		if request.TopP == nil || *request.TopP != 0.9 {
@@ -160,6 +162,14 @@ func TestChatCompletionRequestBuilder(t *testing.T) {
 
 		if request.Seed == nil || *request.Seed != 42 {
 			t.Errorf("Expected seed to be 42, got %v", request.Seed)
+		}
+
+		if request.Logprobs == nil || *request.Logprobs != true {
+			t.Errorf("Expected logprobs to be true, got %v", request.Logprobs)
+		}
+
+		if len(request.Stop) != 2 || request.Stop[0] != "STOP" || request.Stop[1] != "END" {
+			t.Errorf("Expected stop to be [STOP, END], got %v", request.Stop)
 		}
 	})
 }

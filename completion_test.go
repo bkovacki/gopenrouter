@@ -161,6 +161,8 @@ func TestCompletionRequestBuilder(t *testing.T) {
 		topLogProbs := 3
 		minP := 0.1
 		topA := 0.8
+		logprobs := true
+		stop := []string{"stop1", "stop2"}
 
 		builder := gopenrouter.NewCompletionRequestBuilder(testModel, testPrompt)
 		request := builder.
@@ -176,6 +178,8 @@ func TestCompletionRequestBuilder(t *testing.T) {
 			WithTopLogprobs(topLogProbs).
 			WithMinP(minP).
 			WithTopA(topA).
+			WithLogprobs(logprobs).
+			WithStop(stop).
 			Build()
 
 		if *request.Stream != stream {
@@ -214,18 +218,26 @@ func TestCompletionRequestBuilder(t *testing.T) {
 		if *request.TopA != topA {
 			t.Errorf("Expected TopA to be %f, got %f", topA, *request.TopA)
 		}
+		if *request.Logprobs != logprobs {
+			t.Errorf("Expected Logprobs to be %v, got %v", logprobs, *request.Logprobs)
+		}
+		if !reflect.DeepEqual(request.Stop, stop) {
+			t.Errorf("Expected Stop to be %v, got %v", stop, request.Stop)
+		}
 	})
 
 	t.Run("WithArrayAndMapOptions", func(t *testing.T) {
 		models := []string{"model1", "model2"}
 		transforms := []string{"transform1", "transform2"}
 		logitBias := map[string]float64{"123": 1.0, "456": -1.0}
+		stop := []string{"END", "STOP"}
 
 		builder := gopenrouter.NewCompletionRequestBuilder(testModel, testPrompt)
 		request := builder.
 			WithModels(models).
 			WithTransforms(transforms).
 			WithLogitBias(logitBias).
+			WithStop(stop).
 			Build()
 
 		if !reflect.DeepEqual(request.Models, models) {
@@ -236,6 +248,9 @@ func TestCompletionRequestBuilder(t *testing.T) {
 		}
 		if !reflect.DeepEqual(request.LogitBias, logitBias) {
 			t.Errorf("Expected LogitBias to be %v, got %v", logitBias, request.LogitBias)
+		}
+		if !reflect.DeepEqual(request.Stop, stop) {
+			t.Errorf("Expected Stop to be %v, got %v", stop, request.Stop)
 		}
 	})
 
