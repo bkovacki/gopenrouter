@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-var ErrCompletionStreamNotSupported = errors.New("streaming is not supported with this method")
+var ErrCompletionStreamNotSupported = errors.New("streaming is not supported with this method. Use CompletionStream() or ChatCompletionStream() for streaming requests")
 
 // APIError provides error information returned by the OpenAI API.
 type APIError struct {

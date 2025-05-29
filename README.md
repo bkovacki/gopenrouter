@@ -5,12 +5,13 @@ The GOpenRouter library provides convenient access to the [OpenRouter](https://o
 [![License](https://img.shields.io/github/license/bkovacki/gopenrouter)](https://github.com/bkovacki/gopenrouter/blob/main/LICENSE)
 [![codecov](https://codecov.io/gh/bkovacki/gopenrouter/graph/badge.svg?token=vXQDEiWmJI)](https://codecov.io/gh/bkovacki/gopenrouter)
 
-> **Note**: Support for streaming responses will be added in future releases.
+> **Note**: Streaming support is now available! See the [Streaming Documentation](STREAMING.md) for details.
 
 ## Features
 
 - Complete OpenRouter API coverage
 - Text completion and chat completion support
+- **Real-time streaming support** for both completion and chat endpoints
 - Builder pattern for constructing requests
 - Customizable HTTP client with middleware support
 - Proper error handling and detailed error types
@@ -100,7 +101,7 @@ request := gopenrouter.NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", m
 
 // Make the chat completion request
 ctx := context.Background()
-response, err := client.ChatCompletion(ctx, request)
+response, err := client.ChatCompletion(ctx, *request)
 if err != nil {
     log.Fatalf("Chat completion failed: %v", err)
 }
@@ -108,6 +109,54 @@ if err != nil {
 // Use the response
 fmt.Printf("Assistant: %s\n", response.Choices[0].Message.Content)
 ```
+
+### Streaming Responses
+
+For real-time streaming of responses as they are generated:
+
+```go
+import (
+    "context"
+    "fmt"
+    "io"
+    "log"
+    
+    "github.com/bkovacki/gopenrouter"
+)
+
+// Streaming chat completion
+messages := []gopenrouter.ChatMessage{
+    {Role: "user", Content: "Tell me a story"},
+}
+
+request := gopenrouter.NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages).Build()
+
+stream, err := client.ChatCompletionStream(ctx, *request)
+if err != nil {
+    log.Fatal(err)
+}
+defer stream.Close()
+
+fmt.Print("Assistant: ")
+for {
+    chunk, err := stream.Recv()
+    if err == io.EOF {
+        break
+    }
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    for _, choice := range chunk.Choices {
+        if choice.Delta.Content != nil {
+            fmt.Print(*choice.Delta.Content)
+        }
+    }
+}
+fmt.Println()
+```
+
+See the [Streaming Documentation](STREAMING.md) for complete streaming API reference and examples.
 
 ### Advanced Provider Routing
 
@@ -211,6 +260,20 @@ export OPENROUTER_API_KEY="your-api-key-here"
 go run chat_completion.go  # Note: This will incur API charges
 ```
 
+### Streaming Example
+Located in `examples/streaming/`, this example demonstrates:
+- Real-time streaming for both completion and chat completion
+- Handling streaming responses and delta content
+- Model fallback with streaming support
+- Proper stream lifecycle management and error handling
+
+Run the example:
+```bash
+cd examples/streaming
+export OPENROUTER_API_KEY="your-api-key-here"
+go run main.go  # Note: This will incur API charges
+```
+
 ## Error Handling
 
 The library provides detailed error types for API errors and request errors:
@@ -264,7 +327,7 @@ Contributions to GOpenRouter are welcome! Please feel free to submit a Pull Requ
 
 - [x] Chat completion API support
 - [x] Examples for common use cases
-- [ ] Streaming support for completion requests
+- [x] Streaming support for completion and chat completion requests
 - [ ] Additional helper methods for advanced use cases
 
 ## License
