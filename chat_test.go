@@ -1,22 +1,25 @@
-package gopenrouter
+package gopenrouter_test
 
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/bkovacki/gopenrouter"
 )
 
 func TestChatCompletionRequestBuilder(t *testing.T) {
 	t.Run("Basic", func(t *testing.T) {
-		messages := []ChatMessage{
+		messages := []gopenrouter.ChatMessage{
 			{Role: "system", Content: "You are a helpful assistant."},
 			{Role: "user", Content: "What is the capital of France?"},
 		}
 
-		builder := NewChatCompletionRequestBuilder("openai/gpt-4", messages)
+		builder := gopenrouter.NewChatCompletionRequestBuilder("openai/gpt-4", messages)
 		request := builder.
 			WithMaxTokens(100).
 			WithTemperature(0.7).
@@ -50,22 +53,22 @@ func TestChatCompletionRequestBuilder(t *testing.T) {
 	})
 
 	t.Run("WithProviderOptions", func(t *testing.T) {
-		messages := []ChatMessage{
+		messages := []gopenrouter.ChatMessage{
 			{Role: "user", Content: "Test message"},
 		}
 
-		providerOptions := NewProviderOptionsBuilder().
+		providerOptions := gopenrouter.NewProviderOptionsBuilder().
 			WithAllowFallbacks(true).
 			WithMaxPromptPrice(0.01).
 			Build()
 
-		reasoningOptions := &ReasoningOptions{
-			Effort:    EffortMedium,
+		reasoningOptions := &gopenrouter.ReasoningOptions{
+			Effort:    gopenrouter.EffortMedium,
 			MaxTokens: &[]int{50}[0],
 			Exclude:   &[]bool{false}[0],
 		}
 
-		builder := NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages)
+		builder := gopenrouter.NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages)
 		request := builder.
 			WithProvider(providerOptions).
 			WithReasoning(reasoningOptions).
@@ -80,7 +83,7 @@ func TestChatCompletionRequestBuilder(t *testing.T) {
 		if request.Reasoning == nil {
 			t.Error("Expected reasoning options to be set")
 		} else {
-			if request.Reasoning.Effort != EffortMedium {
+			if request.Reasoning.Effort != gopenrouter.EffortMedium {
 				t.Errorf("Expected reasoning effort to be medium, got %s", request.Reasoning.Effort)
 			}
 		}
@@ -95,7 +98,7 @@ func TestChatCompletionRequestBuilder(t *testing.T) {
 	})
 
 	t.Run("WithSamplingParameters", func(t *testing.T) {
-		messages := []ChatMessage{
+		messages := []gopenrouter.ChatMessage{
 			{Role: "user", Content: "Test sampling parameters"},
 		}
 
@@ -104,7 +107,7 @@ func TestChatCompletionRequestBuilder(t *testing.T) {
 			"2000": 100,
 		}
 
-		builder := NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages)
+		builder := gopenrouter.NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages)
 		request := builder.
 			WithTopP(0.9).
 			WithTopK(50).
@@ -177,11 +180,11 @@ func TestChatCompletionRequestBuilder(t *testing.T) {
 func TestChatCompletion(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// Mock response
-		mockResponse := ChatCompletionResponse{
+		mockResponse := gopenrouter.ChatCompletionResponse{
 			ID: "gen-12345",
-			Choices: []ChatChoice{
+			Choices: []gopenrouter.ChatChoice{
 				{
-					Message: ChatMessage{
+					Message: gopenrouter.ChatMessage{
 						Role:    "assistant",
 						Content: "The capital of France is Paris.",
 					},
@@ -189,7 +192,7 @@ func TestChatCompletion(t *testing.T) {
 					FinishReason: "stop",
 				},
 			},
-			Usage: Usage{
+			Usage: gopenrouter.Usage{
 				PromptTokens:     10,
 				CompletionTokens: 8,
 				TotalTokens:      18,
@@ -219,7 +222,7 @@ func TestChatCompletion(t *testing.T) {
 			}
 
 			// Parse request body
-			var req ChatCompletionRequest
+			var req gopenrouter.ChatCompletionRequest
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				t.Errorf("Failed to decode request body: %v", err)
 			}
@@ -241,14 +244,14 @@ func TestChatCompletion(t *testing.T) {
 		defer server.Close()
 
 		// Create client
-		client := New("test-api-key", WithBaseURL(server.URL))
+		client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
 
 		// Create request
-		messages := []ChatMessage{
+		messages := []gopenrouter.ChatMessage{
 			{Role: "user", Content: "What is the capital of France?"},
 		}
 
-		request := NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages).Build()
+		request := gopenrouter.NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages).Build()
 
 		// Make request
 		ctx := context.Background()
@@ -285,21 +288,151 @@ func TestChatCompletion(t *testing.T) {
 	})
 
 	t.Run("StreamNotSupported", func(t *testing.T) {
-		client := New("test-api-key")
+		client := gopenrouter.New("test-api-key")
 
-		messages := []ChatMessage{
+		messages := []gopenrouter.ChatMessage{
 			{Role: "user", Content: "Test message"},
 		}
 
-		request := NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages).
+		request := gopenrouter.NewChatCompletionRequestBuilder("openai/gpt-3.5-turbo", messages).
 			WithStream(true).
 			Build()
 
 		ctx := context.Background()
 		_, err := client.ChatCompletion(ctx, *request)
 
-		if err != ErrCompletionStreamNotSupported {
+		if err != gopenrouter.ErrCompletionStreamNotSupported {
 			t.Errorf("Expected ErrCompletionStreamNotSupported, got %v", err)
 		}
 	})
+}
+
+func TestChatCompletionStream(t *testing.T) {
+	t.Run("SuccessfulStream", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set("Cache-Control", "no-cache")
+			w.WriteHeader(http.StatusOK)
+
+			chunks := []string{
+				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"role":"assistant","content":"Hello"},"finish_reason":null}]}`,
+				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"content":" there"},"finish_reason":null}]}`,
+				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":"stop"}]}`,
+				`data: [DONE]`,
+			}
+
+			for _, chunk := range chunks {
+				w.Write([]byte(chunk + "\n\n"))
+				if f, ok := w.(http.Flusher); ok {
+					f.Flush()
+				}
+			}
+		}))
+		defer server.Close()
+
+		client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
+		messages := []gopenrouter.ChatMessage{{Role: "user", Content: "Hello"}}
+		request := gopenrouter.NewChatCompletionRequestBuilder("test-model", messages).Build()
+
+		stream, err := client.ChatCompletionStream(context.Background(), *request)
+		if err != nil {
+			t.Fatalf("ChatCompletionStream failed: %v", err)
+		}
+		defer stream.Close()
+
+		// Read first chunk
+		chunk1, err := stream.Recv()
+		if err != nil {
+			t.Fatalf("Failed to read first chunk: %v", err)
+		}
+		if chunk1.ID != "chatcmpl-1" {
+			t.Errorf("Expected ID 'chatcmpl-1', got '%s'", chunk1.ID)
+		}
+		if len(chunk1.Choices) != 1 {
+			t.Errorf("Expected 1 choice, got %d", len(chunk1.Choices))
+		}
+		if chunk1.Choices[0].Delta.Role == nil || *chunk1.Choices[0].Delta.Role != "assistant" {
+			t.Errorf("Expected role 'assistant' in first chunk")
+		}
+		if chunk1.Choices[0].Delta.Content == nil || *chunk1.Choices[0].Delta.Content != "Hello" {
+			t.Errorf("Expected content 'Hello' in first chunk")
+		}
+
+		// Read second chunk
+		chunk2, err := stream.Recv()
+		if err != nil {
+			t.Fatalf("Failed to read second chunk: %v", err)
+		}
+		if chunk2.Choices[0].Delta.Content == nil || *chunk2.Choices[0].Delta.Content != " there" {
+			t.Errorf("Expected content ' there' in second chunk")
+		}
+
+		// Read third chunk
+		chunk3, err := stream.Recv()
+		if err != nil {
+			t.Fatalf("Failed to read third chunk: %v", err)
+		}
+		if chunk3.Choices[0].FinishReason == nil || *chunk3.Choices[0].FinishReason != "stop" {
+			t.Errorf("Expected finish_reason 'stop', got %v", chunk3.Choices[0].FinishReason)
+		}
+
+		// Read final chunk - should return EOF
+		_, err = stream.Recv()
+		if err != io.EOF {
+			t.Errorf("Expected EOF at end of stream, got %v", err)
+		}
+	})
+
+	t.Run("StreamAutomaticallyEnabled", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Verify that stream parameter was set to true
+			if r.Header.Get("Accept") != "text/event-stream" {
+				t.Errorf("Expected Accept header 'text/event-stream'")
+			}
+
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("data: [DONE]\n"))
+		}))
+		defer server.Close()
+
+		client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
+		messages := []gopenrouter.ChatMessage{{Role: "user", Content: "Hello"}}
+
+		// Create request without explicitly setting stream=true
+		request := gopenrouter.NewChatCompletionRequestBuilder("test-model", messages).Build()
+
+		stream, err := client.ChatCompletionStream(context.Background(), *request)
+		if err != nil {
+			t.Fatalf("ChatCompletionStream failed: %v", err)
+		}
+		defer stream.Close()
+
+		// Stream should be handled internally - we don't modify the original request
+		// Just verify that the streaming endpoint was called successfully
+	})
+
+}
+
+func TestChatStreamReaderClose(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`data: {"id":"chat-1","choices":[{"index":0,"delta":{"content":"test"}}]}` + "\n"))
+	}))
+	defer server.Close()
+
+	client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
+	messages := []gopenrouter.ChatMessage{{Role: "user", Content: "Hello"}}
+	request := gopenrouter.NewChatCompletionRequestBuilder("test-model", messages).Build()
+
+	stream, err := client.ChatCompletionStream(context.Background(), *request)
+	if err != nil {
+		t.Fatalf("ChatCompletionStream failed: %v", err)
+	}
+
+	err = stream.Close()
+	if err != nil {
+		t.Errorf("Close failed: %v", err)
+	}
 }
