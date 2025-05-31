@@ -5,7 +5,19 @@ The GOpenRouter library provides convenient access to the [OpenRouter](https://o
 [![License](https://img.shields.io/github/license/bkovacki/gopenrouter)](https://github.com/bkovacki/gopenrouter/blob/main/LICENSE)
 [![codecov](https://codecov.io/gh/bkovacki/gopenrouter/graph/badge.svg?token=vXQDEiWmJI)](https://codecov.io/gh/bkovacki/gopenrouter)
 
-> **Note**: Streaming support is now available! See the [Streaming Documentation](STREAMING.md) for details.
+> 🚀 **New Feature**: **Real-time streaming support** is now available for both completion and chat endpoints! Build interactive AI applications with live response generation. See the [**Streaming Documentation**](STREAMING.md) for complete details and examples.
+
+## Quick Navigation
+
+| What you want to do | Go to |
+|---------------------|-------|
+| 🚀 Get started quickly | [Installation](#installation) → [Usage](#usage) |
+| 💬 Build chat applications | [Chat Completions](#chat-completions) |
+| ⚡ Implement real-time streaming | [Streaming Documentation](STREAMING.md) |
+| 🔧 Advanced configuration | [Advanced Provider Routing](#advanced-provider-routing) |
+| 📊 Monitor usage and costs | [Checking Credits](#checking-credits-and-usage) |
+| 🎯 See working examples | [Examples](#examples) |
+| 🐛 Handle errors properly | [Error Handling](#error-handling) |
 
 ## Features
 
@@ -112,7 +124,14 @@ fmt.Printf("Assistant: %s\n", response.Choices[0].Message.Content)
 
 ### Streaming Responses
 
-For real-time streaming of responses as they are generated:
+The library provides comprehensive real-time streaming support for both completion and chat completion endpoints. Streaming allows you to:
+
+- **Reduce perceived latency** by displaying responses as they are generated
+- **Build interactive chat interfaces** with real-time feedback
+- **Handle long responses efficiently** without waiting for complete generation
+- **Implement live AI-powered features** with immediate user feedback
+
+Quick streaming example:
 
 ```go
 import (
@@ -156,7 +175,14 @@ for {
 fmt.Println()
 ```
 
-See the [Streaming Documentation](STREAMING.md) for complete streaming API reference and examples.
+**📚 For comprehensive streaming documentation including:**
+- Complete API reference and response types
+- Advanced usage patterns and best practices  
+- Error handling and resource management
+- Performance considerations and limitations
+- Migration guide from non-streaming code
+
+See the [**Streaming Documentation**](STREAMING.md) for complete details and examples.
 
 ### Advanced Provider Routing
 
