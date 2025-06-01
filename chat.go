@@ -272,7 +272,6 @@ type ChatCompletionStreamResponse struct {
 type ChatCompletionStreamReader struct {
 	reader   *bufio.Scanner
 	response *http.Response
-	buffer   string
 }
 
 // NewChatCompletionStreamReader creates a new stream reader for chat completion responses
@@ -424,7 +423,9 @@ func (c *Client) ChatCompletionStream(
 	}
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 		return nil, c.handleErrorResp(resp)
 	}
 

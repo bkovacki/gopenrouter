@@ -523,7 +523,7 @@ func TestCompletionStream(t *testing.T) {
 			}
 
 			for _, chunk := range chunks {
-				w.Write([]byte(chunk + "\n\n"))
+				_, _ = w.Write([]byte(chunk + "\n\n"))
 				if f, ok := w.(http.Flusher); ok {
 					f.Flush()
 				}
@@ -538,7 +538,7 @@ func TestCompletionStream(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 
 		// Read first chunk
 		chunk1, err := stream.Recv()
@@ -622,7 +622,7 @@ func TestCompletionStream(t *testing.T) {
 			}
 
 			for _, chunk := range chunks {
-				w.Write([]byte(chunk + "\n"))
+				_, _ = w.Write([]byte(chunk + "\n"))
 			}
 		}))
 		defer server.Close()
@@ -634,7 +634,7 @@ func TestCompletionStream(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 
 		// Should skip comments and return the data chunk
 		chunk, err := stream.Recv()
@@ -662,7 +662,7 @@ func TestCompletionStream(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/event-stream")
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("data: [DONE]\n"))
+			_, _ = w.Write([]byte("data: [DONE]\n"))
 		}))
 		defer server.Close()
 
@@ -673,7 +673,7 @@ func TestCompletionStream(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 
 		_, err = stream.Recv()
 		if err != io.EOF {
@@ -684,7 +684,7 @@ func TestCompletionStream(t *testing.T) {
 	t.Run("ServerError", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"error":{"message":"Internal server error"}}`))
+			_, _ = w.Write([]byte(`{"error":{"message":"Internal server error"}}`))
 		}))
 		defer server.Close()
 
@@ -711,7 +711,7 @@ func TestMalformedStreamData(t *testing.T) {
 			}
 
 			for _, chunk := range chunks {
-				w.Write([]byte(chunk + "\n"))
+				_, _ = w.Write([]byte(chunk + "\n"))
 			}
 		}))
 		defer server.Close()
@@ -723,7 +723,7 @@ func TestMalformedStreamData(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 
 		// Should skip invalid JSON and return valid chunk
 		chunk, err := stream.Recv()
@@ -752,14 +752,14 @@ func TestStreamContextCancellation(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 
 			// Send one chunk then delay
-			w.Write([]byte(`data: {"id":"gen-1748550593-SiBpqgpnEC1joxVF6DZZ","provider":"OpenAI","model":"openai/gpt-4o-mini","object":"chat.completion.chunk","created":1748550593,"choices":[{"index":0,"text":"test","finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_34a54ae93c"}` + "\n"))
+			_, _ = w.Write([]byte(`data: {"id":"gen-1748550593-SiBpqgpnEC1joxVF6DZZ","provider":"OpenAI","model":"openai/gpt-4o-mini","object":"chat.completion.chunk","created":1748550593,"choices":[{"index":0,"text":"test","finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_34a54ae93c"}` + "\n"))
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
 			}
 
 			// Long delay to allow context cancellation
 			time.Sleep(100 * time.Millisecond)
-			w.Write([]byte("data: [DONE]\n"))
+			_, _ = w.Write([]byte("data: [DONE]\n"))
 		}))
 		defer server.Close()
 
@@ -777,7 +777,7 @@ func TestStreamContextCancellation(t *testing.T) {
 			}
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 
 		// Read first chunk should work
 		_, err = stream.Recv()
@@ -792,7 +792,7 @@ func TestStreamReaderClose(t *testing.T) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.WriteHeader(http.StatusOK)
 		// Don't send [DONE] to test early close
-		w.Write([]byte(`data: {"id":"gen-1748550593-SiBpqgpnEC1joxVF6DZZ","provider":"OpenAI","model":"openai/gpt-4o-mini","object":"chat.completion.chunk","created":1748550593,"choices":[{"index":0,"text":"test","finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_34a54ae93c"}` + "\n"))
+		_, _ = w.Write([]byte(`data: {"id":"gen-1748550593-SiBpqgpnEC1joxVF6DZZ","provider":"OpenAI","model":"openai/gpt-4o-mini","object":"chat.completion.chunk","created":1748550593,"choices":[{"index":0,"text":"test","finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_34a54ae93c"}` + "\n"))
 	}))
 	defer server.Close()
 
