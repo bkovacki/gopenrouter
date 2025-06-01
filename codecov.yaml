@@ -4,6 +4,16 @@ coverage:
       default:
         target: auto
         threshold: 5
+    patch:
+      default:
+        target: 80%
+        threshold: 5
+        # Only applies to changes (new lines added)
+        only_pulls: true
+        # Require coverage on changed lines
+        if_ci_failed: error
+        # Set informational threshold (won't fail CI)
+        informational: false
   ignore:
     - "examples/**/*"
     - "**/*_test.go"
