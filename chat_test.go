@@ -322,7 +322,7 @@ func TestChatCompletionStream(t *testing.T) {
 			}
 
 			for _, chunk := range chunks {
-				w.Write([]byte(chunk + "\n\n"))
+				_, _ = w.Write([]byte(chunk + "\n\n"))
 				if f, ok := w.(http.Flusher); ok {
 					f.Flush()
 				}
@@ -338,7 +338,7 @@ func TestChatCompletionStream(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ChatCompletionStream failed: %v", err)
 		}
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 
 		// Read first chunk
 		chunk1, err := stream.Recv()
@@ -392,7 +392,7 @@ func TestChatCompletionStream(t *testing.T) {
 
 			w.Header().Set("Content-Type", "text/event-stream")
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("data: [DONE]\n"))
+			_, _ = w.Write([]byte("data: [DONE]\n"))
 		}))
 		defer server.Close()
 
@@ -406,7 +406,7 @@ func TestChatCompletionStream(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ChatCompletionStream failed: %v", err)
 		}
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 
 		// Stream should be handled internally - we don't modify the original request
 		// Just verify that the streaming endpoint was called successfully
@@ -418,7 +418,7 @@ func TestChatStreamReaderClose(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`data: {"id":"chat-1","choices":[{"index":0,"delta":{"content":"test"}}]}` + "\n"))
+		_, _ = w.Write([]byte(`data: {"id":"chat-1","choices":[{"index":0,"delta":{"content":"test"}}]}` + "\n"))
 	}))
 	defer server.Close()
 

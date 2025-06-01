@@ -524,7 +524,6 @@ type StreamingChoice struct {
 type CompletionStreamReader struct {
 	reader   *bufio.Scanner
 	response *http.Response
-	buffer   string
 }
 
 // NewCompletionStreamReader creates a new stream reader for completion responses
@@ -678,7 +677,9 @@ func (c *Client) CompletionStream(
 	}
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 		return nil, c.handleErrorResp(resp)
 	}
 
