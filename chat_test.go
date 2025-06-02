@@ -315,9 +315,10 @@ func TestChatCompletionStream(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 
 			chunks := []string{
-				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"role":"assistant","content":"Hello"},"finish_reason":null}]}`,
-				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"content":" there"},"finish_reason":null}]}`,
-				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":"stop"}]}`,
+				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"role":"assistant","content":"Hello"},"finish_reason":null,"logprobs":{"content":[{"token":"Hello","bytes":[72,101,108,108,111],"logprob":-0.8,"top_logprobs":[{"token":"Hello","bytes":[72,101,108,108,111],"logprob":-0.8},{"token":"Hi","bytes":[72,105],"logprob":-1.5}]}],"refusal":[]}}]}`,
+				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"content":" there"},"finish_reason":null,"logprobs":{"content":[{"token":" there","bytes":[32,116,104,101,114,101],"logprob":-0.2,"top_logprobs":[{"token":" there","bytes":[32,116,104,101,114,101],"logprob":-0.2},{"token":" world","bytes":[32,119,111,114,108,100],"logprob":-2.1}]}],"refusal":[]}}]}`,
+				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":"stop","logprobs":{"content":[{"token":"!","bytes":[33],"logprob":-0.1,"top_logprobs":[{"token":"!","bytes":[33],"logprob":-0.1},{"token":".","bytes":[46],"logprob":-2.8}]}],"refusal":[]}}]}`,
+				`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1234567890,"model":"test-model","choices":[{"index":0,"delta":{},"finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":5,"completion_tokens":3,"total_tokens":8,"prompt_tokens_details":{"cached_tokens":1},"completion_tokens_details":{"reasoning_tokens":0}}}`,
 				`data: [DONE]`,
 			}
 
@@ -358,6 +359,26 @@ func TestChatCompletionStream(t *testing.T) {
 			t.Errorf("Expected content 'Hello' in first chunk")
 		}
 
+		// Verify logprobs in first chunk
+		if chunk1.Choices[0].LogProbs == nil {
+			t.Error("Expected LogProbs to be non-nil in first chunk")
+		} else {
+			if len(chunk1.Choices[0].LogProbs.Content) != 1 {
+				t.Errorf("Expected 1 content token in first chunk, got %d", len(chunk1.Choices[0].LogProbs.Content))
+			} else {
+				token := chunk1.Choices[0].LogProbs.Content[0]
+				if token.Token != "Hello" {
+					t.Errorf("Expected token 'Hello' in first chunk, got '%s'", token.Token)
+				}
+				if token.LogProb != -0.8 {
+					t.Errorf("Expected logprob -0.8 in first chunk, got %f", token.LogProb)
+				}
+				if len(token.TopLogProbs) != 2 {
+					t.Errorf("Expected 2 top logprobs in first chunk, got %d", len(token.TopLogProbs))
+				}
+			}
+		}
+
 		// Read second chunk
 		chunk2, err := stream.Recv()
 		if err != nil {
@@ -367,6 +388,23 @@ func TestChatCompletionStream(t *testing.T) {
 			t.Errorf("Expected content ' there' in second chunk")
 		}
 
+		// Verify logprobs in second chunk
+		if chunk2.Choices[0].LogProbs == nil {
+			t.Error("Expected LogProbs to be non-nil in second chunk")
+		} else {
+			if len(chunk2.Choices[0].LogProbs.Content) != 1 {
+				t.Errorf("Expected 1 content token in second chunk, got %d", len(chunk2.Choices[0].LogProbs.Content))
+			} else {
+				token := chunk2.Choices[0].LogProbs.Content[0]
+				if token.Token != " there" {
+					t.Errorf("Expected token ' there' in second chunk, got '%s'", token.Token)
+				}
+				if token.LogProb != -0.2 {
+					t.Errorf("Expected logprob -0.2 in second chunk, got %f", token.LogProb)
+				}
+			}
+		}
+
 		// Read third chunk
 		chunk3, err := stream.Recv()
 		if err != nil {
@@ -374,6 +412,46 @@ func TestChatCompletionStream(t *testing.T) {
 		}
 		if chunk3.Choices[0].FinishReason == nil || *chunk3.Choices[0].FinishReason != "stop" {
 			t.Errorf("Expected finish_reason 'stop', got %v", chunk3.Choices[0].FinishReason)
+		}
+
+		// Verify logprobs in third chunk
+		if chunk3.Choices[0].LogProbs == nil {
+			t.Error("Expected LogProbs to be non-nil in third chunk")
+		} else {
+			if len(chunk3.Choices[0].LogProbs.Content) != 1 {
+				t.Errorf("Expected 1 content token in third chunk, got %d", len(chunk3.Choices[0].LogProbs.Content))
+			} else {
+				token := chunk3.Choices[0].LogProbs.Content[0]
+				if token.Token != "!" {
+					t.Errorf("Expected token '!' in third chunk, got '%s'", token.Token)
+				}
+				if token.LogProb != -0.1 {
+					t.Errorf("Expected logprob -0.1 in third chunk, got %f", token.LogProb)
+				}
+			}
+		}
+
+		// Read usage chunk
+		chunk4, err := stream.Recv()
+		if err != nil {
+			t.Fatalf("Failed to read usage chunk: %v", err)
+		}
+		if chunk4.Usage == nil {
+			t.Error("Expected Usage to be non-nil in usage chunk")
+		} else {
+			if chunk4.Usage.TotalTokens != 8 {
+				t.Errorf("Expected total tokens 8, got %d", chunk4.Usage.TotalTokens)
+			}
+			if chunk4.Usage.PromptTokensDetails == nil {
+				t.Error("Expected PromptTokensDetails to be non-nil")
+			} else if chunk4.Usage.PromptTokensDetails.CachedTokens != 1 {
+				t.Errorf("Expected cached tokens 1, got %d", chunk4.Usage.PromptTokensDetails.CachedTokens)
+			}
+			if chunk4.Usage.CompletionTokensDetails == nil {
+				t.Error("Expected CompletionTokensDetails to be non-nil")
+			} else if chunk4.Usage.CompletionTokensDetails.ReasoningTokens != 0 {
+				t.Errorf("Expected reasoning tokens 0, got %d", chunk4.Usage.CompletionTokensDetails.ReasoningTokens)
+			}
 		}
 
 		// Read final chunk - should return EOF

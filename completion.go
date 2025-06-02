@@ -132,16 +132,22 @@ type ReasoningOptions struct {
 // CompletionChoice represents a single completion result from the API.
 // The API may return multiple choices depending on the request parameters.
 type CompletionChoice struct {
-	// Text is the generated completion content
-	Text string `json:"text"`
-	// Index is the position of this choice in the array of choices
-	Index int `json:"index"`
+	// LogProbs contains log probability information for the choice (if requested)
+	LogProbs *LogProbs `json:"logprobs,omitempty"`
 	// FinishReason explains why the generation stopped (e.g., "length", "stop")
 	FinishReason string `json:"finish_reason"`
+	// NativeFinishReason is the provider's native finish reason
+	NativeFinishReason string `json:"native_finish_reason"`
+	// Text is the generated completion content
+	Text string `json:"text"`
+	// Reasoning contains reasoning tokens if available
+	Reasoning *string `json:"reasoning,omitempty"`
+	// Index is the position of this choice in the array of choices
+	Index int `json:"index"`
 }
 
 // Usage provides detailed information about token consumption for a request.
-// This helps with monitoring costs and optimizing prompts.
+// This helps users track their API usage and optimize their requests.
 type Usage struct {
 	// PromptTokens is the number of tokens in the input prompt
 	PromptTokens int `json:"prompt_tokens"`
@@ -149,6 +155,52 @@ type Usage struct {
 	CompletionTokens int `json:"completion_tokens"`
 	// TotalTokens is the sum of prompt and completion tokens
 	TotalTokens int `json:"total_tokens"`
+	// PromptTokensDetails provides detailed breakdown of prompt tokens
+	PromptTokensDetails *PromptTokensDetails `json:"prompt_tokens_details,omitempty"`
+	// CompletionTokensDetails provides detailed breakdown of completion tokens
+	CompletionTokensDetails *CompletionTokensDetails `json:"completion_tokens_details,omitempty"`
+}
+
+// PromptTokensDetails provides detailed information about prompt token usage
+type PromptTokensDetails struct {
+	// CachedTokens is the number of tokens that were cached from previous requests
+	CachedTokens int `json:"cached_tokens"`
+}
+
+// CompletionTokensDetails provides detailed information about completion token usage
+type CompletionTokensDetails struct {
+	// ReasoningTokens is the number of tokens used for reasoning (if applicable)
+	ReasoningTokens int `json:"reasoning_tokens"`
+}
+
+// LogProbToken represents a single token with its log probability information
+type LogProbToken struct {
+	// Token is the token string
+	Token string `json:"token"`
+	// Bytes are the UTF-8 byte values of the token
+	Bytes []int `json:"bytes"`
+	// LogProb is the log probability of this token
+	LogProb float64 `json:"logprob"`
+}
+
+// TokenLogProbs represents log probability information for a token
+type TokenLogProbs struct {
+	// Token is the token string
+	Token string `json:"token"`
+	// Bytes are the UTF-8 byte values of the token
+	Bytes []int `json:"bytes"`
+	// LogProb is the log probability of this token
+	LogProb float64 `json:"logprob"`
+	// TopLogProbs contains the most likely tokens at this position
+	TopLogProbs []LogProbToken `json:"top_logprobs"`
+}
+
+// LogProbs represents log probability information for the completion
+type LogProbs struct {
+	// Content contains token-by-token log probabilities for the content
+	Content []TokenLogProbs `json:"content"`
+	// Refusal contains log probabilities for refusal tokens (if applicable)
+	Refusal *[]TokenLogProbs `json:"refusal,omitempty"`
 }
 
 // CompletionRequestBuilder implements a builder pattern for constructing CompletionRequest objects.
@@ -491,10 +543,18 @@ func (b *ProviderOptionsBuilder) Build() *ProviderOptions {
 type CompletionResponse struct {
 	// ID is the unique identifier for this completion request
 	ID string `json:"id"`
+	// Provider is the name of the AI provider that generated the completion
+	Provider string `json:"provider"`
 	// Model is the name of the model that generated the completion
 	Model string `json:"model"`
+	// Object is the object type, typically "chat.completion"
+	Object string `json:"object"`
+	// Created is the Unix timestamp when the completion was created
+	Created int64 `json:"created"`
 	// Choices contains the generated text completions
 	Choices []CompletionChoice `json:"choices"`
+	// SystemFingerprint is a unique identifier for the backend configuration
+	SystemFingerprint *string `json:"system_fingerprint,omitempty"`
 	// Usage provides token usage statistics for the request
 	Usage Usage `json:"usage"`
 }
@@ -513,11 +573,11 @@ type CompletionStreamResponse struct {
 
 // StreamingChoice represents a streaming completion choice with text content
 type StreamingChoice struct {
-	Index              int     `json:"index"`
-	Text               string  `json:"text"`
-	FinishReason       *string `json:"finish_reason"`
-	NativeFinishReason *string `json:"native_finish_reason"`
-	Logprobs           *string `json:"logprobs"`
+	Index              int        `json:"index"`
+	Text               string     `json:"text"`
+	FinishReason       *string    `json:"finish_reason"`
+	NativeFinishReason *string    `json:"native_finish_reason"`
+	LogProbs           *LogProbs  `json:"logprobs,omitempty"`
 }
 
 // CompletionStreamReader implements stream reader for completion responses

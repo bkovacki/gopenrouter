@@ -36,11 +36,41 @@ func TestClientCompletion(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = fmt.Fprint(w, `{
                     "id": "cmpl-123",
+                    "provider": "OpenAI",
                     "model": "test-model",
+                    "object": "text_completion",
+                    "created": 1748815767,
                     "choices": [
-                        {"text": "Hello, world!", "index": 0, "finish_reason": "stop"}
+                        {
+                            "logprobs": {
+                                "content": [
+                                    {
+                                        "token": "Hello",
+                                        "bytes": [72, 101, 108, 108, 111],
+                                        "logprob": -0.5,
+                                        "top_logprobs": [
+                                            {"token": "Hello", "bytes": [72, 101, 108, 108, 111], "logprob": -0.5},
+                                            {"token": "Hi", "bytes": [72, 105], "logprob": -1.2}
+                                        ]
+                                    }
+                                ],
+                                "refusal": []
+                            },
+                            "text": "Hello, world!",
+                            "index": 0,
+                            "finish_reason": "stop",
+                            "native_finish_reason": "stop",
+                            "reasoning": null
+                        }
                     ],
-                    "usage": {"prompt_tokens": 1, "completion_tokens": 2, "total_tokens": 3}
+                    "system_fingerprint": "fp_test123",
+                    "usage": {
+                        "prompt_tokens": 1,
+                        "completion_tokens": 2,
+                        "total_tokens": 3,
+                        "prompt_tokens_details": {"cached_tokens": 0},
+                        "completion_tokens_details": {"reasoning_tokens": 0}
+                    }
                 }`)
 			},
 			expectErr:      false,
@@ -128,6 +158,65 @@ func TestClientCompletion(t *testing.T) {
 				}
 				if len(resp.Choices) == 0 || resp.Choices[0].Text != tc.expectRespText {
 					t.Errorf("unexpected choices: %+v", resp.Choices)
+				}
+				
+				// Additional assertions for enhanced response properties (Success case only)
+				if tc.name == "Success" {
+					// Verify response metadata
+					if resp.ID != "cmpl-123" {
+						t.Errorf("expected ID 'cmpl-123', got '%s'", resp.ID)
+					}
+					if resp.Provider != "OpenAI" {
+						t.Errorf("expected Provider 'OpenAI', got '%s'", resp.Provider)
+					}
+					if resp.Object != "text_completion" {
+						t.Errorf("expected Object 'text_completion', got '%s'", resp.Object)
+					}
+					if resp.Created != 1748815767 {
+						t.Errorf("expected Created 1748815767, got %d", resp.Created)
+					}
+					if resp.SystemFingerprint == nil || *resp.SystemFingerprint != "fp_test123" {
+						t.Errorf("expected SystemFingerprint 'fp_test123', got %v", resp.SystemFingerprint)
+					}
+					
+					// Verify choice logprobs
+					choice := resp.Choices[0]
+					if choice.LogProbs == nil {
+						t.Error("expected LogProbs to be non-nil")
+					} else {
+						if len(choice.LogProbs.Content) != 1 {
+							t.Errorf("expected 1 content token, got %d", len(choice.LogProbs.Content))
+						} else {
+							token := choice.LogProbs.Content[0]
+							if token.Token != "Hello" {
+								t.Errorf("expected token 'Hello', got '%s'", token.Token)
+							}
+							if token.LogProb != -0.5 {
+								t.Errorf("expected logprob -0.5, got %f", token.LogProb)
+							}
+							if len(token.TopLogProbs) != 2 {
+								t.Errorf("expected 2 top logprobs, got %d", len(token.TopLogProbs))
+							}
+						}
+					}
+					
+					// Verify enhanced usage statistics
+					if resp.Usage.PromptTokensDetails == nil {
+						t.Error("expected PromptTokensDetails to be non-nil")
+					} else if resp.Usage.PromptTokensDetails.CachedTokens != 0 {
+						t.Errorf("expected CachedTokens 0, got %d", resp.Usage.PromptTokensDetails.CachedTokens)
+					}
+					
+					if resp.Usage.CompletionTokensDetails == nil {
+						t.Error("expected CompletionTokensDetails to be non-nil")
+					} else if resp.Usage.CompletionTokensDetails.ReasoningTokens != 0 {
+						t.Errorf("expected ReasoningTokens 0, got %d", resp.Usage.CompletionTokensDetails.ReasoningTokens)
+					}
+					
+					// Verify choice details
+					if choice.NativeFinishReason != "stop" {
+						t.Errorf("expected NativeFinishReason 'stop', got '%s'", choice.NativeFinishReason)
+					}
 				}
 			}
 		})
@@ -816,3 +905,5 @@ func TestStreamReaderClose(t *testing.T) {
 		t.Error("Expected error after closing stream")
 	}
 }
+
+

@@ -84,6 +84,8 @@ type ChatCompletionResponse struct {
 	Usage Usage `json:"usage,omitzero"`
 }
 
+
+
 // ChatChoice represents a single chat completion choice from the API.
 // The API may return multiple choices depending on the request parameters.
 type ChatChoice struct {
@@ -93,6 +95,8 @@ type ChatChoice struct {
 	Index int `json:"index,omitempty"`
 	// FinishReason explains why the generation stopped (e.g., "stop", "length")
 	FinishReason string `json:"finish_reason,omitempty"`
+	// LogProbs contains log probability information for the choice (if requested)
+	LogProbs *LogProbs `json:"logprobs,omitempty"`
 }
 
 // ChatCompletionRequestBuilder implements a builder pattern for constructing ChatCompletionRequest objects.
@@ -247,24 +251,38 @@ func (b *ChatCompletionRequestBuilder) Build() *ChatCompletionRequest {
 
 // ChatStreamingChoice represents a streaming chat completion choice with delta content
 type ChatStreamingChoice struct {
+	// Index is the position of this choice in the array of choices
 	Index        int       `json:"index"`
+	// Delta contains the incremental content changes for this streaming chunk
 	Delta        ChatDelta `json:"delta"`
+	// FinishReason explains why the generation stopped (e.g., "stop", "length", "content_filter")
+	// This field is only present in the final chunk of the stream
 	FinishReason *string   `json:"finish_reason"`
+	// LogProbs contains log probability information for the streaming choice (if requested)
+	LogProbs *LogProbs `json:"logprobs,omitempty"`
 }
 
 // ChatDelta represents the incremental content in a streaming chat response
 type ChatDelta struct {
+	// Role is the role of the message sender (e.g., "assistant"), typically only present in the first chunk
 	Role    *string `json:"role,omitempty"`
+	// Content contains the incremental text content being streamed for this chunk
 	Content *string `json:"content,omitempty"`
 }
 
 // ChatCompletionStreamResponse represents a single chunk in a streaming chat completion response
 type ChatCompletionStreamResponse struct {
+	// ID is the unique identifier for this chat completion request
 	ID      string                `json:"id"`
+	// Object is the type of object returned, typically "chat.completion.chunk"
 	Object  string                `json:"object"`
+	// Created is the Unix timestamp when the completion was created
 	Created int64                 `json:"created"`
+	// Model is the identifier of the model used for this completion
 	Model   string                `json:"model"`
+	// Choices contains the streaming chat completion choices with delta content
 	Choices []ChatStreamingChoice `json:"choices"`
+	// Usage provides token usage statistics, typically only present in the final chunk
 	Usage   *Usage                `json:"usage,omitempty"`
 }
 
