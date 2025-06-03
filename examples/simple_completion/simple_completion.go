@@ -46,7 +46,7 @@ func main() {
 		Build()
 
 	// Make the completion request
-	response, err := client.Completion(ctx, request)
+	response, err := client.Completion(ctx, *request)
 	if err != nil {
 		log.Fatalf("Completion failed: %v", err)
 	}
@@ -134,7 +134,7 @@ func main() {
 		WithUsage(true).
 		Build()
 
-	advancedResponse, err := client.Completion(ctx, advancedRequest)
+	advancedResponse, err := client.Completion(ctx, *advancedRequest)
 	if err != nil {
 		log.Printf("Advanced completion failed: %v", err)
 	} else {

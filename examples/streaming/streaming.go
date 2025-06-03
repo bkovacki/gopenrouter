@@ -26,7 +26,7 @@ func main() {
 		"Write a short story about a robot discovering emotions:",
 	).WithMaxTokens(200).Build()
 
-	completionStream, err := client.CompletionStream(ctx, completionRequest)
+	completionStream, err := client.CompletionStream(ctx, *completionRequest)
 	if err != nil {
 		log.Fatalf("Failed to create completion stream: %v", err)
 	}

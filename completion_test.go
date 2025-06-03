@@ -19,7 +19,7 @@ func TestClientCompletion(t *testing.T) {
 	cases := []struct {
 		name           string
 		handler        http.HandlerFunc
-		request        gopenrouter.CompletionRequest
+		request        *gopenrouter.CompletionRequest
 		expectErr      bool
 		expectAPIErr   bool
 		expectReqErr   bool
@@ -127,7 +127,7 @@ func TestClientCompletion(t *testing.T) {
 
 			client := gopenrouter.New("test-key", gopenrouter.WithBaseURL(ts.URL))
 
-			resp, err := client.Completion(context.Background(), tc.request)
+			resp, err := client.Completion(context.Background(), *tc.request)
 			var apiErr *gopenrouter.APIError
 			var reqErr *gopenrouter.RequestError
 
@@ -159,7 +159,7 @@ func TestClientCompletion(t *testing.T) {
 				if len(resp.Choices) == 0 || resp.Choices[0].Text != tc.expectRespText {
 					t.Errorf("unexpected choices: %+v", resp.Choices)
 				}
-				
+
 				// Additional assertions for enhanced response properties (Success case only)
 				if tc.name == "Success" {
 					// Verify response metadata
@@ -178,7 +178,7 @@ func TestClientCompletion(t *testing.T) {
 					if resp.SystemFingerprint == nil || *resp.SystemFingerprint != "fp_test123" {
 						t.Errorf("expected SystemFingerprint 'fp_test123', got %v", resp.SystemFingerprint)
 					}
-					
+
 					// Verify choice logprobs
 					choice := resp.Choices[0]
 					if choice.LogProbs == nil {
@@ -199,20 +199,20 @@ func TestClientCompletion(t *testing.T) {
 							}
 						}
 					}
-					
+
 					// Verify enhanced usage statistics
 					if resp.Usage.PromptTokensDetails == nil {
 						t.Error("expected PromptTokensDetails to be non-nil")
 					} else if resp.Usage.PromptTokensDetails.CachedTokens != 0 {
 						t.Errorf("expected CachedTokens 0, got %d", resp.Usage.PromptTokensDetails.CachedTokens)
 					}
-					
+
 					if resp.Usage.CompletionTokensDetails == nil {
 						t.Error("expected CompletionTokensDetails to be non-nil")
 					} else if resp.Usage.CompletionTokensDetails.ReasoningTokens != 0 {
 						t.Errorf("expected ReasoningTokens 0, got %d", resp.Usage.CompletionTokensDetails.ReasoningTokens)
 					}
-					
+
 					// Verify choice details
 					if choice.NativeFinishReason != "stop" {
 						t.Errorf("expected NativeFinishReason 'stop', got '%s'", choice.NativeFinishReason)
@@ -623,7 +623,7 @@ func TestCompletionStream(t *testing.T) {
 		client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
 		request := gopenrouter.NewCompletionRequestBuilder("test-model", "test prompt").Build()
 
-		stream, err := client.CompletionStream(context.Background(), request)
+		stream, err := client.CompletionStream(context.Background(), *request)
 		if err != nil {
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
@@ -719,7 +719,7 @@ func TestCompletionStream(t *testing.T) {
 		client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
 		request := gopenrouter.NewCompletionRequestBuilder("test-model", "test prompt").Build()
 
-		stream, err := client.CompletionStream(context.Background(), request)
+		stream, err := client.CompletionStream(context.Background(), *request)
 		if err != nil {
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
@@ -758,7 +758,7 @@ func TestCompletionStream(t *testing.T) {
 		client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
 		request := gopenrouter.NewCompletionRequestBuilder("test-model", "test prompt").Build()
 
-		stream, err := client.CompletionStream(context.Background(), request)
+		stream, err := client.CompletionStream(context.Background(), *request)
 		if err != nil {
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
@@ -780,7 +780,7 @@ func TestCompletionStream(t *testing.T) {
 		client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
 		request := gopenrouter.NewCompletionRequestBuilder("test-model", "test prompt").Build()
 
-		_, err := client.CompletionStream(context.Background(), request)
+		_, err := client.CompletionStream(context.Background(), *request)
 		if err == nil {
 			t.Error("Expected error for server error response")
 		}
@@ -808,7 +808,7 @@ func TestMalformedStreamData(t *testing.T) {
 		client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
 		request := gopenrouter.NewCompletionRequestBuilder("test-model", "test").Build()
 
-		stream, err := client.CompletionStream(context.Background(), request)
+		stream, err := client.CompletionStream(context.Background(), *request)
 		if err != nil {
 			t.Fatalf("CompletionStream failed: %v", err)
 		}
@@ -858,7 +858,7 @@ func TestStreamContextCancellation(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 		defer cancel()
 
-		stream, err := client.CompletionStream(ctx, request)
+		stream, err := client.CompletionStream(ctx, *request)
 		if err != nil {
 			// Context might be cancelled before stream is created
 			if strings.Contains(err.Error(), "context deadline exceeded") {
@@ -888,7 +888,7 @@ func TestStreamReaderClose(t *testing.T) {
 	client := gopenrouter.New("test-api-key", gopenrouter.WithBaseURL(server.URL))
 	request := gopenrouter.NewCompletionRequestBuilder("test-model", "test").Build()
 
-	stream, err := client.CompletionStream(context.Background(), request)
+	stream, err := client.CompletionStream(context.Background(), *request)
 	if err != nil {
 		t.Fatalf("CompletionStream failed: %v", err)
 	}
@@ -905,5 +905,3 @@ func TestStreamReaderClose(t *testing.T) {
 		t.Error("Expected error after closing stream")
 	}
 }
-
-

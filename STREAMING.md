@@ -93,7 +93,7 @@ request := gopenrouter.NewCompletionRequestBuilder(
     "Write a poem about Go programming:",
 ).Build()
 
-stream, err := client.CompletionStream(context.Background(), request)
+stream, err := client.CompletionStream(context.Background(), *request)
 if err != nil {
     log.Fatal(err)
 }
@@ -224,7 +224,7 @@ type StreamingChoice struct {
 ### 1. Always Close Streams
 
 ```go
-stream, err := client.ChatCompletionStream(ctx, request)
+stream, err := client.ChatCompletionStream(ctx, *request)
 if err != nil {
     return err
 }
@@ -276,7 +276,7 @@ completeMessage := fullResponse.String()
 ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 defer cancel()
 
-stream, err := client.ChatCompletionStream(ctx, request)
+stream, err := client.ChatCompletionStream(ctx, *request)
 ```
 
 ### 5. Monitor Finish Reasons
@@ -408,14 +408,14 @@ To convert existing non-streaming code:
 
 ```go
 // Before: Non-streaming
-response, err := client.ChatCompletion(ctx, request)
+response, err := client.ChatCompletion(ctx, *request)
 if err != nil {
     return err
 }
 content := response.Choices[0].Message.Content
 
 // After: Streaming
-stream, err := client.ChatCompletionStream(ctx, request)
+stream, err := client.ChatCompletionStream(ctx, *request)
 if err != nil {
     return err
 }

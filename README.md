@@ -2,8 +2,11 @@
 
 The GOpenRouter library provides convenient access to the [OpenRouter](https://openrouter.ai/) REST API from applications written in Go. OpenRouter is a unified API that provides access to various AI models from different providers, including OpenAI, Anthropic, Google, and more.
 
-[![License](https://img.shields.io/github/license/bkovacki/gopenrouter)](https://github.com/bkovacki/gopenrouter/blob/main/LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bkovacki/gopenrouter.svg)](https://pkg.go.dev/github.com/bkovacki/gopenrouter)
+[![GitHub Release](https://img.shields.io/github/v/release/bkovacki/gopenrouter)](https://github.com/bkovacki/gopenrouter/releases)
+[![CI](https://github.com/bkovacki/gopenrouter/workflows/CI/badge.svg)](https://github.com/bkovacki/gopenrouter/actions)
 [![codecov](https://codecov.io/gh/bkovacki/gopenrouter/graph/badge.svg?token=vXQDEiWmJI)](https://codecov.io/gh/bkovacki/gopenrouter)
+[![License](https://img.shields.io/github/license/bkovacki/gopenrouter)](https://github.com/bkovacki/gopenrouter/blob/main/LICENSE)
 
 > 🚀 **New Feature**: **Real-time streaming support** is now available for both completion and chat endpoints! Build interactive AI applications with live response generation. See the [**Streaming Documentation**](STREAMING.md) for complete details and examples.
 
@@ -80,7 +83,7 @@ request := gopenrouter.NewCompletionRequestBuilder(
 
 // Send the completion request
 ctx := context.Background()
-resp, err := client.Completion(ctx, request)
+resp, err := client.Completion(ctx, *request)
 if err != nil {
     log.Fatalf("Completion error: %v", err)
 }
@@ -302,7 +305,7 @@ go run examples/streaming/streaming.go  # Note: This will incur API charges
 The library provides detailed error types for API errors and request errors:
 
 ```go
-resp, err := client.Completion(ctx, request)
+resp, err := client.Completion(ctx, *request)
 if err != nil {
     var apiErr *gopenrouter.APIError
     var reqErr *gopenrouter.RequestError
