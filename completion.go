@@ -206,7 +206,7 @@ type LogProbs struct {
 // CompletionRequestBuilder implements a builder pattern for constructing CompletionRequest objects.
 // This makes it easier to create requests with many optional parameters.
 type CompletionRequestBuilder struct {
-	request CompletionRequest
+	request *CompletionRequest
 }
 
 // NewCompletionRequestBuilder creates a new builder initialized with the required model and prompt.
@@ -219,7 +219,7 @@ type CompletionRequestBuilder struct {
 //   - *CompletionRequestBuilder: A builder instance that can be used to set optional parameters
 func NewCompletionRequestBuilder(model, prompt string) *CompletionRequestBuilder {
 	return &CompletionRequestBuilder{
-		request: CompletionRequest{
+		request: &CompletionRequest{
 			Model:  model,
 			Prompt: prompt,
 		},
@@ -350,10 +350,7 @@ func (b *CompletionRequestBuilder) WithStop(stop []string) *CompletionRequestBui
 }
 
 // Build finalizes and returns the constructed CompletionRequest.
-//
-// Returns:
-//   - CompletionRequest: The fully constructed request object with all configured parameters
-func (b *CompletionRequestBuilder) Build() CompletionRequest {
+func (b *CompletionRequestBuilder) Build() *CompletionRequest {
 	return b.request
 }
 
@@ -573,11 +570,11 @@ type CompletionStreamResponse struct {
 
 // StreamingChoice represents a streaming completion choice with text content
 type StreamingChoice struct {
-	Index              int        `json:"index"`
-	Text               string     `json:"text"`
-	FinishReason       *string    `json:"finish_reason"`
-	NativeFinishReason *string    `json:"native_finish_reason"`
-	LogProbs           *LogProbs  `json:"logprobs,omitempty"`
+	Index              int       `json:"index"`
+	Text               string    `json:"text"`
+	FinishReason       *string   `json:"finish_reason"`
+	NativeFinishReason *string   `json:"native_finish_reason"`
+	LogProbs           *LogProbs `json:"logprobs,omitempty"`
 }
 
 // CompletionStreamReader implements stream reader for completion responses

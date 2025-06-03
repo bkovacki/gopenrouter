@@ -84,8 +84,6 @@ type ChatCompletionResponse struct {
 	Usage Usage `json:"usage,omitzero"`
 }
 
-
-
 // ChatChoice represents a single chat completion choice from the API.
 // The API may return multiple choices depending on the request parameters.
 type ChatChoice struct {
@@ -252,12 +250,12 @@ func (b *ChatCompletionRequestBuilder) Build() *ChatCompletionRequest {
 // ChatStreamingChoice represents a streaming chat completion choice with delta content
 type ChatStreamingChoice struct {
 	// Index is the position of this choice in the array of choices
-	Index        int       `json:"index"`
+	Index int `json:"index"`
 	// Delta contains the incremental content changes for this streaming chunk
-	Delta        ChatDelta `json:"delta"`
+	Delta ChatDelta `json:"delta"`
 	// FinishReason explains why the generation stopped (e.g., "stop", "length", "content_filter")
 	// This field is only present in the final chunk of the stream
-	FinishReason *string   `json:"finish_reason"`
+	FinishReason *string `json:"finish_reason"`
 	// LogProbs contains log probability information for the streaming choice (if requested)
 	LogProbs *LogProbs `json:"logprobs,omitempty"`
 }
@@ -265,7 +263,7 @@ type ChatStreamingChoice struct {
 // ChatDelta represents the incremental content in a streaming chat response
 type ChatDelta struct {
 	// Role is the role of the message sender (e.g., "assistant"), typically only present in the first chunk
-	Role    *string `json:"role,omitempty"`
+	Role *string `json:"role,omitempty"`
 	// Content contains the incremental text content being streamed for this chunk
 	Content *string `json:"content,omitempty"`
 }
@@ -273,17 +271,17 @@ type ChatDelta struct {
 // ChatCompletionStreamResponse represents a single chunk in a streaming chat completion response
 type ChatCompletionStreamResponse struct {
 	// ID is the unique identifier for this chat completion request
-	ID      string                `json:"id"`
+	ID string `json:"id"`
 	// Object is the type of object returned, typically "chat.completion.chunk"
-	Object  string                `json:"object"`
+	Object string `json:"object"`
 	// Created is the Unix timestamp when the completion was created
-	Created int64                 `json:"created"`
+	Created int64 `json:"created"`
 	// Model is the identifier of the model used for this completion
-	Model   string                `json:"model"`
+	Model string `json:"model"`
 	// Choices contains the streaming chat completion choices with delta content
 	Choices []ChatStreamingChoice `json:"choices"`
 	// Usage provides token usage statistics, typically only present in the final chunk
-	Usage   *Usage                `json:"usage,omitempty"`
+	Usage *Usage `json:"usage,omitempty"`
 }
 
 // ChatCompletionStreamReader implements StreamReader for chat completion responses
