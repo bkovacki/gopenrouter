@@ -2,6 +2,25 @@
 ## [Unreleased]
 
 
+<a name="v0.4.0"></a>
+## [v0.4.0] - 2025-06-03
+### Bug Fixes
+- update completion request builder to return pointer
+- remove unused buffer fields and lint errors
+
+### Code Refactoring
+- move streaming code to completion and chat modules
+
+### Documentation
+- update README and enhance streaming documentation
+- consolidate examples to use main module structure
+
+### Features
+- add logprobs support to completion and chat APIs
+- add streaming support for real-time completions
+- add logprobs and stop parameters to completion requests
+
+
 <a name="v0.3.0"></a>
 ## [v0.3.0] - 2025-05-29
 ### Documentation
@@ -43,6 +62,7 @@
 - add tests for list endpoints
 
 
-[Unreleased]: https://github.com/bkovacki/gopenrouter/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bkovacki/gopenrouter/compare/v0.4.0...HEAD
+[v0.4.0]: https://github.com/bkovacki/gopenrouter/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/bkovacki/gopenrouter/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/bkovacki/gopenrouter/compare/v0.1.0...v0.2.0
